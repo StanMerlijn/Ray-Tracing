@@ -1,6 +1,8 @@
 #Define clang from homebrew
-set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
-set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
+if (APPLE)
+    set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
+endif()
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -11,6 +13,8 @@ project(RayTracing VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(FetchContent)
 
 # Import openMP
 # Find OpenMP as before
@@ -30,7 +34,16 @@ endif()
 set(CMAKE_BUILD_TYPE Release)
 
 # Find glm package (make sure glm is installed and available via CMake pkg)
-find_package(glm REQUIRED)
+find_package(glm)
+if (NOT glm_FOUND)
+    message(STATUS "GLM not found. Fetching glm...")
+    FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG 1.0.1
+    )
+    FetchContent_MakeAvailable(glm)
+endif()
 
 file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
